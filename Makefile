@@ -1,6 +1,6 @@
 ﻿# Имя проекта
 #-------------------------------------------------------------------------------
-TARGET  = template
+TARGET  = test
 
 # Используемые модули библиотеки периферии
 #-------------------------------------------------------------------------------
@@ -29,20 +29,28 @@ PERIPHDRIVERS += stm32f10x_rcc
 # Дефайны
 #-------------------------------------------------------------------------------
 DEFINES += USE_STDPERIPH_DRIVER
+DEFINES += STM32F10X_MD
+ifeq (0,1)
 DEFINES += STM32F10X_MD_VL
-
 DEFINES += GCC_ARMCM3
 DEFINES += VECT_TAB_FLASH
 
 # Инструменты
 #-------------------------------------------------------------------------------
+
 AS = arm-none-eabi-gcc
 CC = arm-none-eabi-gcc
 LD = arm-none-eabi-gcc
 CP = arm-none-eabi-objcopy
 SZ = arm-none-eabi-size
-RM = rm
+else
+CC = gcc
+LD = gcc
+CP = objcopy
+SZ = size
+endif
 
+RM = rm
 # Пути к CMSIS, StdPeriph Lib
 #-------------------------------------------------------------------------------
 CMSIS_PATH         = cmsis
@@ -51,7 +59,7 @@ STDPERIPH_SRC_PATH = stdperiph/src
 
 # startup файл
 #-------------------------------------------------------------------------------
-STARTUP = startup/startup_stm32f10x_md_vl.s
+#STARTUP = startup/startup_stm32f10x_md_vl.s
 
 # Пути поиска исходных файлов
 #-------------------------------------------------------------------------------
@@ -72,33 +80,35 @@ LIBS    +=
 
 # Настройки компилятора
 #-------------------------------------------------------------------------------
-CFLAGS += -mthumb -mcpu=cortex-m3 # архитектура и система комманд
-CFLAGS += -std=gnu99              # стандарт языка С
+#CFLAGS += -mthumb -mcpu=cortex-m3 # архитектура и система комманд
+#CFLAGS += -std=gnu99              # стандарт языка С
+CFLAGS += -g
 CFLAGS += -Wall -pedantic         # Выводить все предупреждения
 CFLAGS += -Os                     # Оптимизация
 CFLAGS += -ggdb                   # Генерировать отладочную информацию для gdb
-CFLAGS += -fno-builtin
+#CFLAGS += -fno-builtin
 
 CFLAGS += $(addprefix -I, $(INCLUDES))
 CFLAGS += $(addprefix -D, $(DEFINES))
-
+ifeq (0, 1)
 # Скрипт линкера
 #-------------------------------------------------------------------------------
 LDSCR_PATH = ld-scripts
 LDSCRIPT   = stm32f100rb.ld
-
 # Настройки линкера
 #-------------------------------------------------------------------------------
-LDFLAGS += -nostartfiles
-LDFLAGS += -L$(LDSCR_PATH)
+#LDFLAGS += -nostartfiles
 LDFLAGS += -T$(LDSCR_PATH)/$(LDSCRIPT)
+endif
+LDFLAGS += -L$(LDSCR_PATH)
 LDFLAGS += $(addprefix -L, $(LIBPATH))
 LDFLAGS += $(LIBS)
 
+ifeq (0, 1)
 # Настройки ассемблера
 #-------------------------------------------------------------------------------
 AFLAGS += -ahls -mapcs-32
-
+endif
 # Список объектных файлов
 #-------------------------------------------------------------------------------
 OBJS += $(patsubst %.c, %.o, $(wildcard  $(addsuffix /*.c, $(SOURCEDIRS))))
@@ -120,18 +130,18 @@ TOREMOVE += $(TARGET)
 
 # Собрать все
 #-------------------------------------------------------------------------------
-all: $(TARGET).hex size	
+all: $(TARGET).elf size
 
 # Очистка
 #-------------------------------------------------------------------------------
 clean:
 	@$(RM) -f $(TOREMOVE)  
-
+ifeq (0, 1)
 # Создание .hex файла
 #-------------------------------------------------------------------------------
 $(TARGET).hex: $(TARGET).elf
 	@$(CP) -Oihex $(TARGET).elf $(TARGET).hex
-	
+endif
 # Показываем размер
 #-------------------------------------------------------------------------------
 size:
