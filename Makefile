@@ -30,25 +30,12 @@ PERIPHDRIVERS += stm32f10x_rcc
 #-------------------------------------------------------------------------------
 DEFINES += USE_STDPERIPH_DRIVER
 DEFINES += STM32F10X_MD
-ifeq (0,1)
-DEFINES += STM32F10X_MD_VL
-DEFINES += GCC_ARMCM3
-DEFINES += VECT_TAB_FLASH
 
-# Инструменты
-#-------------------------------------------------------------------------------
-
-AS = arm-none-eabi-gcc
-CC = arm-none-eabi-gcc
-LD = arm-none-eabi-gcc
-CP = arm-none-eabi-objcopy
-SZ = arm-none-eabi-size
-else
 CC = gcc
 LD = gcc
 CP = objcopy
 SZ = size
-endif
+
 
 RM = rm
 # Пути к CMSIS, StdPeriph Lib
@@ -90,25 +77,11 @@ CFLAGS += -ggdb                   # Генерировать отладочну�
 
 CFLAGS += $(addprefix -I, $(INCLUDES))
 CFLAGS += $(addprefix -D, $(DEFINES))
-ifeq (0, 1)
-# Скрипт линкера
-#-------------------------------------------------------------------------------
-LDSCR_PATH = ld-scripts
-LDSCRIPT   = stm32f100rb.ld
-# Настройки линкера
-#-------------------------------------------------------------------------------
-#LDFLAGS += -nostartfiles
-LDFLAGS += -T$(LDSCR_PATH)/$(LDSCRIPT)
-endif
+
 LDFLAGS += -L$(LDSCR_PATH)
 LDFLAGS += $(addprefix -L, $(LIBPATH))
 LDFLAGS += $(LIBS)
 
-ifeq (0, 1)
-# Настройки ассемблера
-#-------------------------------------------------------------------------------
-AFLAGS += -ahls -mapcs-32
-endif
 # Список объектных файлов
 #-------------------------------------------------------------------------------
 OBJS += $(patsubst %.c, %.o, $(wildcard  $(addsuffix /*.c, $(SOURCEDIRS))))
@@ -136,12 +109,7 @@ all: $(TARGET).elf size
 #-------------------------------------------------------------------------------
 clean:
 	@$(RM) -f $(TOREMOVE)  
-ifeq (0, 1)
-# Создание .hex файла
-#-------------------------------------------------------------------------------
-$(TARGET).hex: $(TARGET).elf
-	@$(CP) -Oihex $(TARGET).elf $(TARGET).hex
-endif
+
 # Показываем размер
 #-------------------------------------------------------------------------------
 size:
