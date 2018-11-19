@@ -2,6 +2,7 @@ Makefile
 cmsis/stm32f10x.h
 cmsis/system_stm32f10x.c
 cmsis/system_stm32f10x.h
+cmsis/core_cm3.h
 src/main.c
 src/stm32f10x_conf.h
 src/stm32f10x_it.c
