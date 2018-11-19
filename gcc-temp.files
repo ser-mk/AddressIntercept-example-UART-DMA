@@ -1,6 +1,4 @@
 Makefile
-cmsis/core_cm3.c
-cmsis/core_cm3.h
 cmsis/stm32f10x.h
 cmsis/system_stm32f10x.c
 cmsis/system_stm32f10x.h
