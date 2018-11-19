@@ -124,7 +124,7 @@
  @{
 */
 
-
+#if 0
 /** @addtogroup CMSIS_CM3_NVIC CMSIS CM3 NVIC
   memory mapped structure for Nested Vectored Interrupt Controller (NVIC)
   @{
@@ -1803,7 +1803,7 @@ static __INLINE int ITM_CheckChar (void) {
     return (1);                                 /*    character available */
   }
 }
-
+#endif
 /*@}*/ /* end of group CMSIS_CM3_core_DebugInterface */
 
 

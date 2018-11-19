@@ -22,7 +22,7 @@
  ******************************************************************************/
 
 #include <stdint.h>
-
+#if 0
 /* define compiler specific symbols */
 #if defined ( __CC_ARM   )
   #define __ASM            __asm                                      /*!< asm keyword for ARM Compiler          */
@@ -780,5 +780,5 @@ uint32_t __STREXW(uint32_t value, uint32_t *addr)
  * Please use "carm -?i" to get an up to date list of all instrinsics,
  * Including the CMSIS ones.
  */
-
+#endif
 #endif
