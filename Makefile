@@ -69,6 +69,7 @@ LIBS    +=
 #-------------------------------------------------------------------------------
 #CFLAGS += -mthumb -mcpu=cortex-m3 # архитектура и система комманд
 #CFLAGS += -std=gnu99              # стандарт языка С
+CFLAGS += -m32
 CFLAGS += -g
 CFLAGS += -Wall -pedantic         # Выводить все предупреждения
 CFLAGS += -Os                     # Оптимизация
@@ -81,6 +82,7 @@ CFLAGS += $(addprefix -D, $(DEFINES))
 LDFLAGS += -L$(LDSCR_PATH)
 LDFLAGS += $(addprefix -L, $(LIBPATH))
 LDFLAGS += $(LIBS)
+LDFLAGS += -m32
 
 # Список объектных файлов
 #-------------------------------------------------------------------------------
