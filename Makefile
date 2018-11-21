@@ -22,7 +22,7 @@ PERIPHDRIVERS += stm32f10x_rcc
 # PERIPHDRIVERS += stm32f10x_sdio
 # PERIPHDRIVERS += stm32f10x_spi
 # PERIPHDRIVERS += stm32f10x_tim
-# PERIPHDRIVERS += stm32f10x_usart
+PERIPHDRIVERS += stm32f10x_usart
 # PERIPHDRIVERS += stm32f10x_wwdg
 # PERIPHDRIVERS += misc.c
 
