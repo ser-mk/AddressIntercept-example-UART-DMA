@@ -4,43 +4,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-
-addr_t pAddrSRAM = NULL;
-addr_t pAddrPERIPH = NULL;
-
-
-static const size_t QTY_REMOTE_REGION = 2U;
-static const addr_t REMOTE_PERIPHERAL_ADDR = (addr_t)0x40000000U;
-static const size_t REMOTE_PERIPHERAL_SIZE = 0x30000U;
-
-static const addr_t REMOTE_MEMORY_ADDR = (addr_t)0x20000000U;
-static const size_t REMOTE_MEMORY_SIZE = 96*1024;
-
-
-static memoryTranslate * memoryMap = NULL;
-static sizeMemoryTranslate_t sizeMemoryMap = 0;
-
-static void setAddr(memoryTranslate *map, size_t size, addr_t remote_addr){
-    map->start_addr = malloc(size);
-    map->end_addr = memoryMap->start_addr + size;
-    map->reference_addr = remote_addr;
-}
-
-memoryTranslate * getMemoryMap(sizeMemoryTranslate_t * size){
-    memoryMap = (memoryTranslate *)malloc(sizeof(memoryTranslate)*QTY_REMOTE_REGION);
-
-    setAddr(memoryMap, REMOTE_PERIPHERAL_SIZE, REMOTE_PERIPHERAL_ADDR);
-
-    setAddr(memoryMap + 1, REMOTE_MEMORY_SIZE, REMOTE_MEMORY_ADDR);
-
-    *size = sizeMemoryMap = QTY_REMOTE_REGION;
-
-    printf("memoryMap = %p %p s = %p\n", memoryMap, memoryMap + 1, size);
-
-    return memoryMap;
-}
-
-
 #define USARTy                   USART1
 #define USARTy_GPIO              GPIOA
 #define USARTy_CLK               RCC_APB2Periph_USART1
@@ -68,6 +31,9 @@ memoryTranslate * getMemoryMap(sizeMemoryTranslate_t * size){
 const uint8_t * addrDMAbuf = 0x20000000;
 const size_t sizeDMAbuf = 0x200;
 
+extern addr_t pAddrSRAM;
+extern addr_t pAddrPERIPH;
+
 void init(void);
 
 int main()
@@ -75,16 +41,10 @@ int main()
 
     sizeMemoryTranslate_t s = 0;
 
-        memoryTranslate * p = getMemoryMap(&s);
+    memoryTranslate * p = getMemoryMap(&s);
 
-        printf("size : %d  p : %p\n", s, p);
-
-        pAddrPERIPH = p[0].start_addr;
-
-            pAddrSRAM = p[1].start_addr;
-
-            //printf("!RCC %p\n", RCC);
-            *(int*)pAddrSRAM = 0;
+    pAddrPERIPH = p[0].start_addr;
+    pAddrSRAM = p[1].start_addr;
 
     init();
 
@@ -127,7 +87,7 @@ int main()
 		
         GPIO_ResetBits(GPIOC, GPIO_Pin_13);
         sleep(1);
-	}
+    }
 	return 0;
 }
 
