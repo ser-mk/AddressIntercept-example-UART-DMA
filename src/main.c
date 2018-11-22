@@ -99,7 +99,7 @@ int main()
 	
     for(int i = 0; i < sizeDMAbuf; i++)
     {
-        const uint8_t sendByte = i & 0x7F;
+        const uint8_t sendByte = i;
     /* Send one byte from USARTy to USARTz */
         USART_SendData(USARTy, sendByte);
 
@@ -244,7 +244,7 @@ void init(void)
       USART_InitStructure.USART_BaudRate = 230400;
       USART_InitStructure.USART_WordLength = USART_WordLength_8b;
       USART_InitStructure.USART_StopBits = USART_StopBits_1;
-      USART_InitStructure.USART_Parity = USART_Parity_Even;
+      USART_InitStructure.USART_Parity = USART_Parity_No; //USART_Parity_Even;
       USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
       USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
