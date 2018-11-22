@@ -190,9 +190,6 @@ void DMA_Configuration(void)
 {
   DMA_InitTypeDef DMA_InitStructure;
 
-  /* USARTy TX DMA1 Channel (triggered by USARTy Tx event) Config */
-  //DMA_DeInit(USARTy_Tx_DMA_Channel);
-
   DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
   DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
   DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
@@ -200,25 +197,6 @@ void DMA_Configuration(void)
   DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
   DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
   DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-#if 0
-  DMA_Init(USARTy_Tx_DMA_Channel, &DMA_InitStructure);
-
-  /* USARTy RX DMA1 Channel (triggered by USARTy Rx event) Config */
-  DMA_DeInit(USARTy_Rx_DMA_Channel);
-  DMA_InitStructure.DMA_PeripheralBaseAddr = USARTy_DR_Base;
-  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)RxBuffer1;
-  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-  DMA_InitStructure.DMA_BufferSize = TxBufferSize2;
-  DMA_Init(USARTy_Rx_DMA_Channel, &DMA_InitStructure);
-
-  /* USARTz TX DMA1 Channel (triggered by USARTz Tx event) Config */
-  DMA_DeInit(USARTz_Tx_DMA_Channel);
-  DMA_InitStructure.DMA_PeripheralBaseAddr = USARTz_DR_Base;
-  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)TxBuffer2;
-  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-  DMA_InitStructure.DMA_BufferSize = TxBufferSize2;
-  DMA_Init(USARTz_Tx_DMA_Channel, &DMA_InitStructure);
-#endif
   /* USARTz RX DMA1 Channel (triggered by USARTz Rx event) Config */
   DMA_DeInit(USARTz_Rx_DMA_Channel);
   DMA_InitStructure.DMA_PeripheralBaseAddr = USARTz_DR_Base;
