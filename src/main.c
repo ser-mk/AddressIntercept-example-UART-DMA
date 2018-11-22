@@ -9,7 +9,7 @@ addr_t pAddrSRAM = NULL;
 addr_t pAddrPERIPH = NULL;
 
 
-static const size_t QTY_REMOTE_REGION = 1U;
+static const size_t QTY_REMOTE_REGION = 2U;
 static const addr_t REMOTE_PERIPHERAL_ADDR = (addr_t)0x40000000U;
 static const size_t REMOTE_PERIPHERAL_SIZE = 0x30000U;
 
@@ -47,6 +47,11 @@ memoryTranslate * getMemoryMap(sizeMemoryTranslate_t * size){
 #define USARTy_GPIO_CLK          RCC_APB2Periph_GPIOA
 #define USARTy_RxPin             GPIO_Pin_10
 #define USARTy_TxPin             GPIO_Pin_9
+#define USARTy_Tx_DMA_Channel    DMA1_Channel4
+#define USARTy_Tx_DMA_FLAG       DMA1_FLAG_TC4
+#define USARTy_Rx_DMA_Channel    DMA1_Channel5
+#define USARTy_Rx_DMA_FLAG       DMA1_FLAG_TC5
+#define USARTy_DR_Base           0x40013804
 
 #define USARTz                   USART2
 #define USARTz_GPIO              GPIOA
@@ -54,6 +59,14 @@ memoryTranslate * getMemoryMap(sizeMemoryTranslate_t * size){
 #define USARTz_GPIO_CLK          RCC_APB2Periph_GPIOA
 #define USARTz_RxPin             GPIO_Pin_3
 #define USARTz_TxPin             GPIO_Pin_2
+#define USARTz_Tx_DMA_Channel    DMA1_Channel7
+#define USARTz_Tx_DMA_FLAG       DMA1_FLAG_TC7
+#define USARTz_Rx_DMA_Channel    DMA1_Channel6
+#define USARTz_Rx_DMA_FLAG       DMA1_FLAG_TC6
+#define USARTz_DR_Base           0x40004404
+
+const uint8_t * addrDMAbuf = 0x20000000;
+const size_t sizeDMAbuf = 0x200;
 
 void init(void);
 
@@ -70,7 +83,8 @@ int main()
 
             pAddrSRAM = p[1].start_addr;
 
-            printf("!RCC %p\n", RCC);
+            //printf("!RCC %p\n", RCC);
+            *(int*)pAddrSRAM = 0;
 
     init();
 
@@ -83,29 +97,28 @@ int main()
 	gpio.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOC, &gpio);
 	
-	for(;;)
+    for(int i = 0; i < sizeDMAbuf; i++)
     {
-        const uint8_t sendByte = 0x75;
+        const uint8_t sendByte = i & 0x7F;
     /* Send one byte from USARTy to USARTz */
         USART_SendData(USARTy, sendByte);
 
         /* Loop until USARTy DR register is empty */
-        while(USART_GetFlagStatus(USARTy, USART_FLAG_TXE) == RESET)
-        {
-        }
+        while(USART_GetFlagStatus(USARTy, USART_FLAG_TXE) == RESET){}
 
         printf("send byte %x ...\n", sendByte);
 
         /* Loop until the USARTz Receive Data Register is not empty */
-        while(USART_GetFlagStatus(USARTz, USART_FLAG_RXNE) == RESET)
-        {
+        //while(USART_GetFlagStatus(USARTz, USART_FLAG_RXNE) == RESET){}
+
+        const uint16_t rec =  DMA_GetCurrDataCounter(USARTz_Rx_DMA_Channel);
+
+        printf("... received byte %d : ", rec);
+        const uint8_t * pM = (uint8_t *)pAddrSRAM;
+        for(int r = 0; r < 0x20; r++){
+            printf(" %x,", pM[r]);
         }
-
-        /* Store the received byte in RxBuffer */
-        const uint8_t rByte = (USART_ReceiveData(USARTz) & 0x7F);
-
-        printf("... receive byte %x\n", rByte);
-
+        printf("\n");
 
         GPIO_SetBits(GPIOC, GPIO_Pin_13);
         sleep(1);
@@ -125,6 +138,10 @@ int main()
   */
 void RCC_Configuration(void)
 {
+
+    /* DMA clock enable */
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+
   /* Enable GPIO clock */
   RCC_APB2PeriphClockCmd(USARTy_GPIO_CLK | USARTz_GPIO_CLK | RCC_APB2Periph_AFIO, ENABLE);
 
@@ -164,6 +181,60 @@ void GPIO_Configuration(void)
   GPIO_Init(USARTz_GPIO, &GPIO_InitStructure);
 }
 
+/**
+  * @brief  Configures the DMA.
+  * @param  None
+  * @retval None
+  */
+void DMA_Configuration(void)
+{
+  DMA_InitTypeDef DMA_InitStructure;
+
+  /* USARTy TX DMA1 Channel (triggered by USARTy Tx event) Config */
+  //DMA_DeInit(USARTy_Tx_DMA_Channel);
+
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+  DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
+  DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+#if 0
+  DMA_Init(USARTy_Tx_DMA_Channel, &DMA_InitStructure);
+
+  /* USARTy RX DMA1 Channel (triggered by USARTy Rx event) Config */
+  DMA_DeInit(USARTy_Rx_DMA_Channel);
+  DMA_InitStructure.DMA_PeripheralBaseAddr = USARTy_DR_Base;
+  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)RxBuffer1;
+  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+  DMA_InitStructure.DMA_BufferSize = TxBufferSize2;
+  DMA_Init(USARTy_Rx_DMA_Channel, &DMA_InitStructure);
+
+  /* USARTz TX DMA1 Channel (triggered by USARTz Tx event) Config */
+  DMA_DeInit(USARTz_Tx_DMA_Channel);
+  DMA_InitStructure.DMA_PeripheralBaseAddr = USARTz_DR_Base;
+  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)TxBuffer2;
+  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+  DMA_InitStructure.DMA_BufferSize = TxBufferSize2;
+  DMA_Init(USARTz_Tx_DMA_Channel, &DMA_InitStructure);
+#endif
+  /* USARTz RX DMA1 Channel (triggered by USARTz Rx event) Config */
+  DMA_DeInit(USARTz_Rx_DMA_Channel);
+  DMA_InitStructure.DMA_PeripheralBaseAddr = USARTz_DR_Base;
+  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)addrDMAbuf;
+  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+  DMA_InitStructure.DMA_BufferSize = sizeDMAbuf;
+  DMA_Init(USARTz_Rx_DMA_Channel, &DMA_InitStructure);
+}
+
+/**
+  * @brief  Compares two buffers.
+  * @param  pBuffer1, pBuffer2: buffers to be compared.
+  * @param  BufferLength: buffer's length
+  * @retval PASSED: pBuffer1 identical to pBuffer2
+  *         FAILED: pBuffer1 differs from pBuffer2
+  */
 
 void init(void)
 {
@@ -179,6 +250,9 @@ void init(void)
 
       /* Configure the GPIO ports */
       GPIO_Configuration();
+
+      /* Configure the DMA */
+      DMA_Configuration();
 
     /* USARTy and USARTz configuration ------------------------------------------------------*/
       /* USARTy and USARTz configured as follow:
@@ -201,9 +275,16 @@ void init(void)
       /* Configure USARTz */
       USART_Init(USARTz, &USART_InitStructure);
 
+      /* Enable USARTz DMA Rx and TX request */
+      USART_DMACmd(USARTz, USART_DMAReq_Rx, ENABLE);
+
+      /* Enable USARTz RX DMA1 Channel */
+      DMA_Cmd(USARTz_Rx_DMA_Channel, ENABLE);
+
       /* Enable the USARTy */
       USART_Cmd(USARTy, ENABLE);
 
       /* Enable the USARTz */
       USART_Cmd(USARTz, ENABLE);
+
 }

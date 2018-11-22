@@ -17,6 +17,7 @@ stdperiph/inc/stm32f10x_crc.h
 stdperiph/inc/stm32f10x_dac.h
 stdperiph/inc/stm32f10x_dbgmcu.h
 stdperiph/inc/stm32f10x_dma.h
+stdperiph/inc/stm32f10x_dma.h
 stdperiph/inc/stm32f10x_exti.h
 stdperiph/inc/stm32f10x_flash.h
 stdperiph/inc/stm32f10x_fsmc.h

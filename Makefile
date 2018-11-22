@@ -24,6 +24,7 @@ PERIPHDRIVERS += stm32f10x_rcc
 # PERIPHDRIVERS += stm32f10x_tim
 PERIPHDRIVERS += stm32f10x_usart
 # PERIPHDRIVERS += stm32f10x_wwdg
+PERIPHDRIVERS += stm32f10x_dma
 # PERIPHDRIVERS += misc.c
 
 # Дефайны
