@@ -80,7 +80,6 @@ CFLAGS += -ggdb                   # Генерировать отладочну�
 CFLAGS += $(addprefix -I, $(INCLUDES))
 CFLAGS += $(addprefix -D, $(DEFINES))
 
-LDFLAGS += -L$(LDSCR_PATH)
 LDFLAGS += $(addprefix -L, $(LIBPATH))
 LDFLAGS += $(LIBS)
 LDFLAGS += -m32
