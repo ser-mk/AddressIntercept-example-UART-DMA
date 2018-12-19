@@ -29,7 +29,7 @@
 #define USARTz_DR_Base           0x40004404
 
 const uint8_t * addrDMAbuf = (uint8_t *)0x20000000;
-const size_t sizeDMAbuf = 0x200;
+const size_t sizeDMAbuf = 0x100;
 
 extern addr_t pAddrSRAM;
 extern addr_t pAddrPERIPH;
