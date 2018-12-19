@@ -73,7 +73,8 @@ int main()
 
         const uint16_t rec =  DMA_GetCurrDataCounter(USARTz_Rx_DMA_Channel);
 
-        printf("... received byte %d : ", rec);
+        printf("qty of received byte using DMA : %d\n", sizeDMAbuf - rec);
+        printf("first 20 bytes of buffer DMA : ");
         const uint8_t * pM = (uint8_t *)pAddrSRAM;
         for(int r = 0; r < 0x20; r++){
             printf(" %x,", pM[r]);
@@ -83,7 +84,7 @@ int main()
         GPIO_SetBits(GPIOC, GPIO_Pin_13);
         sleep(1);
 
-        printf("toogle\n");
+        printf("blink led\n");
 		
         GPIO_ResetBits(GPIOC, GPIO_Pin_13);
         sleep(1);
