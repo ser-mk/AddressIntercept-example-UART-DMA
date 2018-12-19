@@ -1,8 +1,8 @@
-﻿# Имя проекта
+﻿# App name
 #-------------------------------------------------------------------------------
 TARGET  = test
 
-# Используемые модули библиотеки периферии
+# peripherial driver
 #-------------------------------------------------------------------------------
 # PERIPHDRIVERS += stm32f10x_adc
 # PERIPHDRIVERS += stm32f10x_bkp
@@ -27,7 +27,7 @@ PERIPHDRIVERS += stm32f10x_usart
 PERIPHDRIVERS += stm32f10x_dma
 # PERIPHDRIVERS += misc.c
 
-# Дефайны
+# USE DEFINES
 #-------------------------------------------------------------------------------
 DEFINES += USE_STDPERIPH_DRIVER
 DEFINES += STM32F10X_MD
@@ -39,43 +39,39 @@ SZ = size
 
 
 RM = rm
-# Пути к CMSIS, StdPeriph Lib
+# PATH to CMSIS and StdPeriph Lib
 #-------------------------------------------------------------------------------
 CMSIS_PATH         = cmsis
 STDPERIPH_INC_PATH = stdperiph/inc
 STDPERIPH_SRC_PATH = stdperiph/src
 
-# startup файл
+# startup file
 #-------------------------------------------------------------------------------
-#STARTUP = startup/startup_stm32f10x_md_vl.s
 
-# Пути поиска исходных файлов
+# PATH SOURCE
 #-------------------------------------------------------------------------------
 SOURCEDIRS := src
 SOURCEDIRS += $(CMSIS_PATH)
 
-# Пути поиска хидеров
+# PATH HEADERS
 #-------------------------------------------------------------------------------
 INCLUDES += .
 INCLUDES += $(SOURCEDIRS) 
 INCLUDES += $(CMSIS_PATH)
 INCLUDES += $(STDPERIPH_INC_PATH)
 
-# Библиотеки
+# EXTRA LIBRARY
 #-------------------------------------------------------------------------------
 LIBPATH +=
 LIBS    +=
 
-# Настройки компилятора
+# TOOLCHAIN OPTIONS
 #-------------------------------------------------------------------------------
-#CFLAGS += -mthumb -mcpu=cortex-m3 # архитектура и система комманд
-#CFLAGS += -std=gnu99              # стандарт языка С
 CFLAGS += -m32
 CFLAGS += -g
 CFLAGS += -Wall -pedantic         # Выводить все предупреждения
 CFLAGS += -Os                     # Оптимизация
 CFLAGS += -ggdb                   # Генерировать отладочную информацию для gdb
-#CFLAGS += -fno-builtin
 
 CFLAGS += $(addprefix -I, $(INCLUDES))
 CFLAGS += $(addprefix -D, $(DEFINES))
@@ -84,17 +80,17 @@ LDFLAGS += $(addprefix -L, $(LIBPATH))
 LDFLAGS += $(LIBS)
 LDFLAGS += -m32
 
-# Список объектных файлов
+# OBJECT FILES
 #-------------------------------------------------------------------------------
 OBJS += $(patsubst %.c, %.o, $(wildcard  $(addsuffix /*.c, $(SOURCEDIRS))))
 OBJS += $(addprefix $(STDPERIPH_SRC_PATH)/, $(addsuffix .o, $(PERIPHDRIVERS)))
 OBJS += $(patsubst %.s, %.o, $(STARTUP))
 
-# Пути поиска make
+# list of directories that make should search
 #-------------------------------------------------------------------------------
 VPATH := $(SOURCEDIRS)
 
-# Список файлов к удалению командой "make clean"
+# temp file
 #-------------------------------------------------------------------------------
 TOREMOVE += *.elf *.hex
 TOREMOVE += $(addsuffix /*.o, $(SOURCEDIRS))
@@ -103,7 +99,7 @@ TOREMOVE += $(STDPERIPH_SRC_PATH)/*.o
 TOREMOVE += $(patsubst %.s, %.o, $(STARTUP))
 TOREMOVE += $(TARGET)
 
-# Собрать все
+# general build
 #-------------------------------------------------------------------------------
 all: $(TARGET).elf size
 
@@ -112,18 +108,18 @@ all: $(TARGET).elf size
 clean:
 	@$(RM) -f $(TOREMOVE)  
 
-# Показываем размер
+# show size
 #-------------------------------------------------------------------------------
 size:
 	@echo "---------------------------------------------------"
 	@$(SZ) $(TARGET).elf
 
-# Линковка
+# linking
 #------------------------------------------------------------------------------- 
 $(TARGET).elf: $(OBJS)
 	@$(LD) $(LDFLAGS) $^ -o $@
 
-# Компиляция
+# compile
 #------------------------------------------------------------------------------- 
 %.o: %.c
 	@$(CC) $(CFLAGS) -MD -c $< -o $@
@@ -131,6 +127,6 @@ $(TARGET).elf: $(OBJS)
 %.o: %.s
 	@$(AS) $(AFLAGS) -c $< -o $@
 
-# Сгенерированные gcc зависимости
+# create d-files
 #-------------------------------------------------------------------------------
 include $(wildcart *.d)
