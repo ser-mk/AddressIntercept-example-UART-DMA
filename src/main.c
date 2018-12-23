@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 #include <stdio.h>
 
 #define USARTy                   USART1
@@ -34,62 +35,73 @@ const size_t sizeDMAbuf = 0x100;
 extern addr_t pAddrSRAM;
 extern addr_t pAddrPERIPH;
 
+const char * message = "AddressIntercept PinTool UART DMA example";
+
 void init(void);
 
 int main()
 {
 
-    sizeMemoryTranslate_t s = 0;
+  sizeMemoryTranslate_t s = 0;
 
-    memoryTranslate * p = getMemoryMap(&s);
+  memoryTranslate *p = getMemoryMap(&s);
 
-    pAddrPERIPH = p[0].start_addr;
-    pAddrSRAM = p[1].start_addr;
+  pAddrPERIPH = p[0].start_addr;
+  pAddrSRAM = p[1].start_addr;
 
-    init();
+  init();
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-	
-	GPIO_InitTypeDef gpio;
-	
-    gpio.GPIO_Pin = GPIO_Pin_13;
-	gpio.GPIO_Speed = GPIO_Speed_50MHz;
-	gpio.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOC, &gpio);
-	
-    for(int i = 0; i < sizeDMAbuf; i++)
-    {
-        const uint8_t sendByte = i;
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+
+  GPIO_InitTypeDef gpio;
+
+  gpio.GPIO_Pin = GPIO_Pin_13;
+  gpio.GPIO_Speed = GPIO_Speed_50MHz;
+  gpio.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_Init(GPIOC, &gpio);
+
+  const size_t _SIZE_MESSAGE = strlen(message);
+
+  printf("sending message ");
+
+  for (int i = 0; i < _SIZE_MESSAGE; i++) {
     /* Send one byte from USARTy to USARTz */
-        USART_SendData(USARTy, sendByte);
+    USART_SendData(USARTy, message[i]);
 
-        /* Loop until USARTy DR register is empty */
-        while(USART_GetFlagStatus(USARTy, USART_FLAG_TXE) == RESET){}
+    GPIO_SetBits(GPIOC, GPIO_Pin_13);
 
-        printf("send byte %x ...\n", sendByte);
+    /* Loop until USARTy DR register is empty */
+    while (USART_GetFlagStatus(USARTy, USART_FLAG_TXE) == RESET)
+      ;
 
-        /* Loop until the USARTz Receive Data Register is not empty */
-        //while(USART_GetFlagStatus(USARTz, USART_FLAG_RXNE) == RESET){}
+    printf(".");
+    fflush(stdout);
 
-        const uint16_t rec =  DMA_GetCurrDataCounter(USARTz_Rx_DMA_Channel);
+    GPIO_ResetBits(GPIOC, GPIO_Pin_13);
+  }
+  printf("\n");
 
-        printf("qty of received byte using DMA : %d\n", sizeDMAbuf - rec);
-        printf("first 20 bytes of buffer DMA : ");
-        const uint8_t * pM = (uint8_t *)pAddrSRAM;
-        for(int r = 0; r < 0x20; r++){
-            printf(" %x,", pM[r]);
-        }
-        printf("\n");
+  printf("qty of sent bytes %d\n", strlen(message));
 
-        GPIO_SetBits(GPIOC, GPIO_Pin_13);
-        sleep(1);
+  /* Loop until the USARTz Receive Data Register is not empty */
+  // while(USART_GetFlagStatus(USARTz, USART_FLAG_RXNE) == RESET){}
 
-        printf("blink led\n");
-		
-        GPIO_ResetBits(GPIOC, GPIO_Pin_13);
-        sleep(1);
-    }
-	return 0;
+  const uint16_t rec = DMA_GetCurrDataCounter(USARTz_Rx_DMA_Channel);
+
+  printf("qty of received byte using DMA : %d\n", sizeDMAbuf - rec);
+  printf("read message from buffer DMA : ");
+  const uint8_t *pM = (uint8_t *)pAddrSRAM;
+  for (int r = 0; r < _SIZE_MESSAGE; r++) {
+    printf("%c", pM[r]);
+    fflush(stdout);
+  }
+  printf("\n");
+
+  assert(strncmp(message, (const char *)pM, _SIZE_MESSAGE) == 0);
+
+  printf("Received and sent bytes are equal!\n");
+
+  return 0;
 }
 
 /**
