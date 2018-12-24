@@ -83,9 +83,6 @@ int main()
 
   printf("qty of sent bytes %d\n", strlen(message));
 
-  /* Loop until the USARTz Receive Data Register is not empty */
-  // while(USART_GetFlagStatus(USARTz, USART_FLAG_RXNE) == RESET){}
-
   const uint16_t rec = DMA_GetCurrDataCounter(USARTz_Rx_DMA_Channel);
 
   printf("qty of received byte using DMA : %d\n", sizeDMAbuf - rec);
