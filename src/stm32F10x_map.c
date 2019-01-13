@@ -6,6 +6,7 @@
 
 #include "addrIntercept.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 addr_t pAddrSRAM = NULL;
 addr_t pAddrPERIPH = NULL;
@@ -39,4 +40,16 @@ memoryTranslate * getMemoryMap(sizeMemoryTranslate_t * size){
     *size = sizeMemoryMap = QTY_REMOTE_REGION;
 
     return memoryMap;
+}
+
+void initPintoolClient(){
+
+    sizeMemoryTranslate_t s = 0;
+
+    memoryTranslate *p = getMemoryMap(&s);
+
+    pAddrPERIPH = p[0].start_addr;
+    pAddrSRAM = p[1].start_addr;
+
+    printf("Initializing Pintool client \n");
 }

@@ -32,22 +32,15 @@
 const uint8_t * addrDMAbuf = (uint8_t *)0x20000000;
 const size_t sizeDMAbuf = 0x100;
 
-extern addr_t pAddrSRAM;
-extern addr_t pAddrPERIPH;
-
 const char * message = "AddressIntercept PinTool UART DMA example";
 
 void init(void);
+void initPintoolClient();
 
 int main()
 {
 
-  sizeMemoryTranslate_t s = 0;
-
-  memoryTranslate *p = getMemoryMap(&s);
-
-  pAddrPERIPH = p[0].start_addr;
-  pAddrSRAM = p[1].start_addr;
+  initPintoolClient();
 
   init();
 
