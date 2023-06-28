@@ -57,7 +57,7 @@
 /** @addtogroup Library_configuration_section
   * @{
   */
-#include "addrIntercept.h"
+  
 /* Uncomment the line below according to the target STM32 device used in your
    application 
   */
@@ -1267,15 +1267,11 @@ typedef struct
 /** @addtogroup Peripheral_memory_map
   * @{
   */
- extern addr_t pAddrSRAM;
- extern addr_t pAddrPERIPH;
+
 
 #define FLASH_BASE            ((uint32_t)0x08000000) /*!< FLASH base address in the alias region */
- //#define SRAM_BASE             ((uint32_t)0x20000000) /*!< SRAM base address in the alias region */
- //#define PERIPH_BASE           ((uint32_t)0x40000000) /*!< Peripheral base address in the alias region */
- #define SRAM_BASE             ((AddrType)pAddrSRAM)
- #define PERIPH_BASE           ((AddrType)pAddrPERIPH)
-
+#define SRAM_BASE             ((uint32_t)0x20000000) /*!< SRAM base address in the alias region */
+#define PERIPH_BASE           ((uint32_t)0x40000000) /*!< Peripheral base address in the alias region */
 
 #define SRAM_BB_BASE          ((uint32_t)0x22000000) /*!< SRAM base address in the bit-band region */
 #define PERIPH_BB_BASE        ((uint32_t)0x42000000) /*!< Peripheral base address in the bit-band region */
