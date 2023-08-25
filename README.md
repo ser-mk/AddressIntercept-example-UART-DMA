@@ -1,5 +1,7 @@
 # Address Intercept example UART-DMA
 
+Habrahabr articles https://habr.com/ru/post/433504/ & https://habr.com/ru/post/434080/
+
 This is an example of using [AddressIntercept technology](https://github.com/ser-mk/AddressIntercept "AddressIntercept technology") to control microcontroller periphery from a host PC. The example tunes periphery of microcontroller STM32F103C8 , namely, UART1, UART2, DMA and GPIO LED (PC13 pin). Then UART1 sends byte message and UART2 receives it using DMA. Also the led blinks. At the end, received and sent message are checked.
 
 Here ​Standard Peripherals Library​ is applied for high-level interaction with MCU periphery. Thanks to  [AddressIntercept](https://github.com/ser-mk/AddressIntercept) , we can use this MCU library on a host PC. There is nothing that can prevent linking any library from the  host PC.
